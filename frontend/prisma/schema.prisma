@@ -1,0 +1,672 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  code        String     @id @db.VarChar(64)
+  displayName String     @map("display_name") @db.VarChar(100)
+  users       UserRole[]
+  sessions    Session[]
+  permissions RolePermission[]
+  assignments UserAssignment[]
+
+  @@map("roles")
+}
+
+model Permission {
+  code        String           @id @db.VarChar(128)
+  description String           @db.VarChar(255)
+  roles       RolePermission[]
+  accessRequests AccessRequest[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleCode       String     @map("role_code") @db.VarChar(64)
+  permissionCode String     @map("permission_code") @db.VarChar(128)
+  role           Role       @relation(fields: [roleCode], references: [code], onDelete: Cascade)
+  permission     Permission @relation(fields: [permissionCode], references: [code], onDelete: Cascade)
+
+  @@id([roleCode, permissionCode])
+  @@map("role_permissions")
+}
+
+model User {
+  id            BigInt             @id @default(autoincrement())
+  displayName   String             @map("display_name") @db.VarChar(160)
+  username      String?            @unique @db.VarChar(64)
+  email         String?            @unique @db.VarChar(254)
+  phoneE164     String?            @unique @map("phone_e164") @db.VarChar(16)
+  passwordHash  String             @map("password_hash") @db.VarChar(255)
+  isActive      Boolean            @default(true) @map("is_active")
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  roles         UserRole[]
+  sessions      Session[]
+  childrenMade  Child[]            @relation("ChildCreator")
+  guardianships ChildGuardian[]
+  activityLogs  ActivityLog[]
+  resetTokens   PasswordResetToken[]
+  centerAssignments UserHealthCenter[]
+  appointmentRequests AppointmentRequest[] @relation("AppointmentParent")
+  growthMeasurements GrowthMeasurement[] @relation("GrowthRecorder")
+  vaccinationRecords VaccinationRecord[] @relation("VaccinationRecorder")
+  approvedSchedules VaccinationSchedule[] @relation("ScheduleApprover")
+  nutritionRecords NutritionRecord[]
+  alertsCreated HealthAlert[] @relation("AlertCreator")
+  alertsReviewed HealthAlert[] @relation("AlertReviewer")
+  communityVisits CommunityVisit[]
+  healthReferrals HealthReferral[] @relation("ReferralAgent")
+  professionalObservations ProfessionalObservation[]
+  notifications Notification[]
+  auditEvents AuditEvent[]
+  scopedAssignments UserAssignment[] @relation("AssignedUser")
+  assignmentsMade UserAssignment[] @relation("AssignmentAssigner")
+  professionalProfile ProfessionalProfile?
+  consentEventsRecorded ConsentRecord[] @relation("ConsentRecorder")
+  accessRequests AccessRequest[] @relation("AccessRequester")
+  accessRequestsReviewed AccessRequest[] @relation("AccessReviewer")
+  capabilitiesGranted UserCapability[] @relation("CapabilityGrantor")
+
+  @@map("users")
+}
+
+model UserRole {
+  userId     BigInt   @map("user_id")
+  roleCode   String   @map("role_code") @db.VarChar(64)
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz(6)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleCode], references: [code], onDelete: Restrict)
+  capabilities UserCapability[]
+
+  @@id([userId, roleCode])
+  @@index([roleCode])
+  @@map("user_roles")
+}
+
+model Session {
+  id        String   @id @db.Char(64)
+  userId    BigInt   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  lastSeen  DateTime @default(now()) @map("last_seen") @db.Timestamptz(6)
+  roleCode  String   @map("role_code") @db.VarChar(64)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleCode], references: [code], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model LoginAttempt {
+  key         String   @id @db.Char(64)
+  count       Int      @default(0)
+  windowStart DateTime @default(now()) @map("window_start") @db.Timestamptz(6)
+  lockedUntil DateTime? @map("locked_until") @db.Timestamptz(6)
+
+  @@map("login_attempts")
+}
+
+model ActivityLog {
+  id          BigInt   @id @default(autoincrement())
+  userId      BigInt?  @map("user_id")
+  action      String   @db.VarChar(100)
+  description String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@map("activity_logs")
+}
+
+model PasswordResetToken {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  tokenHash String   @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model Child {
+  id             BigInt          @id @default(autoincrement())
+  firstName      String          @map("first_name") @db.VarChar(100)
+  lastName       String          @map("last_name") @db.VarChar(100)
+  dateOfBirth    DateTime        @map("date_of_birth") @db.Date
+  sex            ChildSex
+  placeOfBirth   String?         @map("place_of_birth") @db.VarChar(160)
+  addressText    String?         @map("address_text") @db.VarChar(500)
+  photoPath      String?         @map("photo_path") @db.VarChar(255)
+  createdByUserId BigInt         @map("created_by_user_id")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  creator        User            @relation("ChildCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  guardians      ChildGuardian[]
+  appointments AppointmentRequest[]
+  growthMeasurements GrowthMeasurement[]
+  vaccinationRecords VaccinationRecord[]
+  medicalRecord MedicalRecord?
+  nutritionRecords NutritionRecord[]
+  healthAlerts HealthAlert[]
+  communityVisits CommunityVisit[]
+  healthReferrals HealthReferral[]
+  professionalObservations ProfessionalObservation[]
+  accessRequests AccessRequest[]
+
+  @@index([dateOfBirth])
+  @@index([createdByUserId])
+  @@map("children")
+}
+
+enum ChildSex {
+  female
+  male
+  unknown
+
+  @@map("child_sex")
+}
+
+model ChildGuardian {
+  childId          BigInt   @map("child_id")
+  userId           BigInt   @map("user_id")
+  relationshipType String   @map("relationship_type") @db.VarChar(32)
+  isPrimary        Boolean  @default(false) @map("is_primary")
+  consentStatus    String   @default("pending") @map("consent_status") @db.VarChar(16)
+  consentAt        DateTime? @map("consent_at") @db.Timestamptz(6)
+  consentWithdrawnAt DateTime? @map("consent_withdrawn_at") @db.Timestamptz(6)
+  linkedAt         DateTime @default(now()) @map("linked_at") @db.Timestamptz(6)
+  child            Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consentEvents    ConsentRecord[]
+
+  @@id([childId, userId])
+  @@index([userId])
+  @@map("child_guardians")
+}
+
+model HealthCenter {
+  id          BigInt   @id @default(autoincrement())
+  name        String   @db.VarChar(180)
+  phoneE164   String?  @map("phone_e164") @db.VarChar(16)
+  addressText String?  @map("address_text") @db.VarChar(500)
+  province    String?  @db.VarChar(120)
+  city        String?  @db.VarChar(120)
+  latitude    Decimal? @db.Decimal(10, 7)
+  longitude   Decimal? @db.Decimal(10, 7)
+  provinceId  BigInt?  @map("province_id")
+  healthZoneId BigInt? @map("health_zone_id")
+  healthAreaId BigInt? @map("health_area_id")
+  facilityCode String? @map("facility_code") @db.VarChar(64)
+  facilityType HealthFacilityType? @map("facility_type")
+  source String? @db.VarChar(120)
+  sourceVersion String? @map("source_version") @db.VarChar(64)
+  verificationStatus String? @map("verification_status") @db.VarChar(32)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  services HealthCenterService[]
+  users UserHealthCenter[]
+  appointments AppointmentRequest[]
+  vaccinationRecords VaccinationRecord[]
+  alerts HealthAlert[]
+  referrals HealthReferral[]
+  observations ProfessionalObservation[]
+  provinceRecord Province? @relation(fields: [provinceId], references: [id], onDelete: SetNull)
+  healthZone HealthZone? @relation(fields: [healthZoneId], references: [id], onDelete: SetNull)
+  healthArea HealthArea? @relation(fields: [healthAreaId], references: [id], onDelete: SetNull)
+  scopedAssignments UserAssignment[]
+
+  @@index([name])
+  @@map("health_centers")
+}
+
+model HealthCenterService {
+  id             BigInt @id @default(autoincrement())
+  healthCenterId BigInt @map("health_center_id")
+  serviceName    String @map("service_name") @db.VarChar(120)
+  center HealthCenter @relation(fields: [healthCenterId], references: [id], onDelete: Cascade)
+
+  @@unique([healthCenterId, serviceName])
+  @@map("health_center_services")
+}
+
+model UserHealthCenter {
+  userId         BigInt   @map("user_id")
+  healthCenterId BigInt   @map("health_center_id")
+  assignedAt     DateTime @default(now()) @map("assigned_at") @db.Timestamptz(6)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  center HealthCenter @relation(fields: [healthCenterId], references: [id], onDelete: Cascade)
+
+  @@id([userId, healthCenterId])
+  @@map("user_health_centers")
+}
+
+model AppointmentRequest {
+  id             BigInt   @id @default(autoincrement())
+  childId        BigInt   @map("child_id")
+  parentUserId   BigInt   @map("parent_user_id")
+  healthCenterId BigInt   @map("health_center_id")
+  requestType    String   @default("consultation") @map("request_type") @db.VarChar(40)
+  preferredDate  DateTime? @map("preferred_date") @db.Date
+  status         String   @default("pending") @db.VarChar(16)
+  scheduledAt    DateTime? @map("scheduled_at") @db.Timestamptz(6)
+  responseMessage String? @map("response_message") @db.VarChar(500)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  parent User @relation("AppointmentParent", fields: [parentUserId], references: [id], onDelete: Restrict)
+  center HealthCenter @relation(fields: [healthCenterId], references: [id], onDelete: Restrict)
+
+  @@index([parentUserId, status, createdAt])
+  @@index([healthCenterId, status, createdAt])
+  @@index([childId, createdAt])
+  @@map("appointment_requests")
+}
+
+model GrowthMeasurement {
+  id              BigInt   @id @default(autoincrement())
+  childId         BigInt   @map("child_id")
+  recordedByUserId BigInt  @map("recorded_by_user_id")
+  measuredAt      DateTime @map("measured_at") @db.Timestamptz(6)
+  weightKg        Decimal? @map("weight_kg") @db.Decimal(6, 3)
+  lengthHeightCm  Decimal? @map("length_height_cm") @db.Decimal(6, 2)
+  lengthHeightType String? @map("length_height_type") @db.VarChar(16)
+  muacCm          Decimal? @map("muac_cm") @db.Decimal(6, 2)
+  notes           String?  @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  recorder User @relation("GrowthRecorder", fields: [recordedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([childId, measuredAt])
+  @@index([recordedByUserId])
+  @@map("growth_measurements")
+}
+
+model Vaccine {
+  id          BigInt   @id @default(autoincrement())
+  vaccineCode String   @unique @map("vaccine_code") @db.VarChar(64)
+  displayName String   @map("display_name") @db.VarChar(160)
+  description String?  @db.VarChar(500)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  doses VaccineDose[]
+
+  @@map("vaccines")
+}
+
+model VaccineDose {
+  id          BigInt @id @default(autoincrement())
+  vaccineId   BigInt @map("vaccine_id")
+  doseCode    String @map("dose_code") @db.VarChar(64)
+  displayName String @map("display_name") @db.VarChar(120)
+  doseOrder   Int    @map("dose_order") @db.SmallInt
+  vaccine Vaccine @relation(fields: [vaccineId], references: [id], onDelete: Cascade)
+  scheduleDoses VaccinationScheduleDose[]
+  records VaccinationRecord[]
+
+  @@unique([vaccineId, doseCode])
+  @@unique([vaccineId, doseOrder])
+  @@map("vaccine_doses")
+}
+
+model VaccinationSchedule {
+  id                BigInt   @id @default(autoincrement())
+  scheduleCode      String   @map("schedule_code") @db.VarChar(64)
+  displayName       String   @map("display_name") @db.VarChar(160)
+  jurisdictionCode  String   @map("jurisdiction_code") @db.Char(2)
+  programName       String   @map("program_name") @db.VarChar(160)
+  versionLabel      String   @map("version_label") @db.VarChar(64)
+  effectiveFrom     DateTime? @map("effective_from") @db.Date
+  effectiveUntil    DateTime? @map("effective_until") @db.Date
+  status            String   @default("draft") @db.VarChar(16)
+  approvedByUserId  BigInt?  @map("approved_by_user_id")
+  approvedAt        DateTime? @map("approved_at") @db.Timestamptz(6)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  approver User? @relation("ScheduleApprover", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  doses VaccinationScheduleDose[]
+
+  @@unique([scheduleCode, versionLabel])
+  @@index([jurisdictionCode, status])
+  @@map("vaccination_schedules")
+}
+
+model VaccinationScheduleDose {
+  scheduleId              BigInt @map("schedule_id")
+  vaccineDoseId           BigInt @map("vaccine_dose_id")
+  earliestAgeDays         Int?   @map("earliest_age_days")
+  recommendedAgeDays      Int    @map("recommended_age_days")
+  latestAgeDays           Int?   @map("latest_age_days")
+  intervalReferenceDoseId BigInt? @map("interval_reference_dose_id")
+  minimumIntervalDays     Int?   @map("minimum_interval_days") @db.SmallInt
+  schedule VaccinationSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  dose VaccineDose @relation(fields: [vaccineDoseId], references: [id], onDelete: Restrict)
+  intervalReferenceDose VaccinationScheduleDose? @relation("DoseInterval", fields: [scheduleId, intervalReferenceDoseId], references: [scheduleId, vaccineDoseId], onDelete: Restrict)
+  intervalsToThisDose VaccinationScheduleDose[] @relation("DoseInterval")
+
+  @@id([scheduleId, vaccineDoseId])
+  @@map("vaccination_schedule_doses")
+}
+
+model VaccinationRecord {
+  id              BigInt   @id @default(autoincrement())
+  childId         BigInt   @map("child_id")
+  vaccineDoseId   BigInt   @map("vaccine_dose_id")
+  administeredAt  DateTime @map("administered_at") @db.Timestamptz(6)
+  nextDoseDate    DateTime? @map("next_dose_date") @db.Date
+  status          String   @default("administered") @db.VarChar(16)
+  notes           String?  @db.VarChar(500)
+  recordedByUserId BigInt  @map("recorded_by_user_id")
+  healthCenterId  BigInt?  @map("health_center_id")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  dose VaccineDose @relation(fields: [vaccineDoseId], references: [id], onDelete: Restrict)
+  recorder User @relation("VaccinationRecorder", fields: [recordedByUserId], references: [id], onDelete: Restrict)
+  center HealthCenter? @relation(fields: [healthCenterId], references: [id], onDelete: SetNull)
+
+  @@index([childId, administeredAt])
+  @@index([vaccineDoseId])
+  @@index([recordedByUserId])
+  @@map("vaccination_records")
+}
+
+model MedicalRecord {
+  id             BigInt   @id @default(autoincrement())
+  childId        BigInt   @unique @map("child_id")
+  bloodGroup     String?  @map("blood_group") @db.VarChar(8)
+  allergies      String?
+  medicalHistory String?  @map("medical_history")
+  notes          String?
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("medical_records")
+}
+
+model NutritionRecord {
+  id               BigInt   @id @default(autoincrement())
+  childId          BigInt   @map("child_id")
+  recordDate       DateTime @map("record_date") @db.Date
+  nutritionalStatus String? @map("nutritional_status") @db.VarChar(64)
+  feedingType      String?  @map("feeding_type") @db.VarChar(64)
+  observations     String?
+  recommendations  String?
+  healthWorkerId   BigInt   @map("health_worker_id")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  worker User @relation(fields: [healthWorkerId], references: [id], onDelete: Restrict)
+
+  @@index([childId, recordDate])
+  @@index([healthWorkerId])
+  @@map("nutrition_records")
+}
+
+model HealthAlert {
+  id             BigInt   @id @default(autoincrement())
+  childId        BigInt   @map("child_id")
+  alertType      String   @map("alert_type") @db.VarChar(64)
+  severity       String   @db.VarChar(16)
+  description    String   @db.VarChar(1000)
+  status         String   @default("pending_review") @db.VarChar(20)
+  createdByUserId BigInt? @map("created_by_user_id")
+  reviewedByUserId BigInt? @map("reviewed_by_user_id")
+  reviewedAt     DateTime? @map("reviewed_at") @db.Timestamptz(6)
+  reviewNotes    String?  @map("review_notes") @db.VarChar(1000)
+  healthCenterId BigInt?  @map("health_center_id")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  resolvedAt     DateTime? @map("resolved_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  creator User? @relation("AlertCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  reviewer User? @relation("AlertReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  center HealthCenter? @relation(fields: [healthCenterId], references: [id], onDelete: SetNull)
+  observations ProfessionalObservation[]
+
+  @@index([childId, status, createdAt])
+  @@index([severity, status, createdAt])
+  @@index([reviewedByUserId])
+  @@map("health_alerts")
+}
+
+model CommunityVisit {
+  id           BigInt   @id @default(autoincrement())
+  childId      BigInt   @map("child_id")
+  agentUserId  BigInt   @map("agent_user_id")
+  visitType    String   @map("visit_type") @db.VarChar(32)
+  visitedAt    DateTime @map("visited_at") @db.Timestamptz(6)
+  purpose      String   @db.VarChar(160)
+  observations String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  agent User @relation(fields: [agentUserId], references: [id], onDelete: Restrict)
+  referrals HealthReferral[]
+
+  @@index([agentUserId, visitedAt])
+  @@index([childId, visitedAt])
+  @@map("community_visits")
+}
+
+model HealthReferral {
+  id                  BigInt   @id @default(autoincrement())
+  childId             BigInt   @map("child_id")
+  agentUserId         BigInt   @map("agent_user_id")
+  healthCenterId      BigInt   @map("health_center_id")
+  communityVisitId    BigInt?  @map("community_visit_id")
+  concernDescription  String   @map("concern_description") @db.VarChar(1000)
+  priority            String   @default("routine") @db.VarChar(16)
+  status              String   @default("awaiting_follow_up") @db.VarChar(24)
+  referredAt          DateTime @default(now()) @map("referred_at") @db.Timestamptz(6)
+  followedUpAt        DateTime? @map("followed_up_at") @db.Timestamptz(6)
+  followUpNotes       String?  @map("follow_up_notes") @db.VarChar(500)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  agent User @relation("ReferralAgent", fields: [agentUserId], references: [id], onDelete: Restrict)
+  center HealthCenter @relation(fields: [healthCenterId], references: [id], onDelete: Restrict)
+  visit CommunityVisit? @relation(fields: [communityVisitId], references: [id], onDelete: SetNull)
+  observations ProfessionalObservation[]
+
+  @@index([agentUserId, status, referredAt])
+  @@index([healthCenterId, status, referredAt])
+  @@index([childId, referredAt])
+  @@map("health_referrals")
+}
+
+model ProfessionalObservation {
+  id                   BigInt   @id @default(autoincrement())
+  childId              BigInt   @map("child_id")
+  healthCenterId       BigInt   @map("health_center_id")
+  healthProfessionalId BigInt   @map("health_professional_id")
+  healthAlertId        BigInt?  @map("health_alert_id")
+  healthReferralId     BigInt?  @map("health_referral_id")
+  observationType     String   @map("observation_type") @db.VarChar(32)
+  content              String
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  child Child @relation(fields: [childId], references: [id], onDelete: Restrict)
+  center HealthCenter @relation(fields: [healthCenterId], references: [id], onDelete: Restrict)
+  professional User @relation(fields: [healthProfessionalId], references: [id], onDelete: Restrict)
+  alert HealthAlert? @relation(fields: [healthAlertId], references: [id], onDelete: SetNull)
+  referral HealthReferral? @relation(fields: [healthReferralId], references: [id], onDelete: SetNull)
+
+  @@index([childId, createdAt])
+  @@index([healthCenterId, createdAt])
+  @@index([healthProfessionalId, createdAt])
+  @@map("professional_observations")
+}
+
+model Notification {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  title     String   @db.VarChar(180)
+  message   String   @db.VarChar(1000)
+  type      String   @db.VarChar(64)
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+model AuditEvent {
+  id          BigInt   @id @default(autoincrement())
+  actorUserId BigInt?  @map("actor_user_id")
+  eventCode   String   @map("event_code") @db.VarChar(100)
+  subjectType String   @map("subject_type") @db.VarChar(64)
+  subjectId   BigInt?  @map("subject_id")
+  requestId   String?  @map("request_id") @db.Char(36)
+  occurredAt  DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, occurredAt])
+  @@index([subjectType, subjectId, occurredAt])
+  @@index([requestId])
+  @@map("audit_events")
+}
+
+model Province {
+  id          BigInt          @id @default(autoincrement())
+  code        String          @unique @db.VarChar(64)
+  name        String          @db.VarChar(120)
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  zones       HealthZone[]
+  centers     HealthCenter[]
+  assignments UserAssignment[]
+
+  @@map("provinces")
+}
+
+model HealthZone {
+    id          BigInt          @id @default(autoincrement())
+    code        String          @unique @db.VarChar(64)
+    name        String          @db.VarChar(120)
+    provinceId  BigInt          @map("province_id")
+    createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+    province    Province        @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+    areas       HealthArea[]
+    centers     HealthCenter[]
+    assignments UserAssignment[]
+
+    @@index([provinceId, name])
+    @@map("health_zones")
+  }
+
+  model HealthArea {
+    id          BigInt       @id @default(autoincrement())
+    code        String?      @unique @db.VarChar(64)
+    name        String       @db.VarChar(120)
+    healthZoneId BigInt      @map("health_zone_id")
+    createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+    healthZone  HealthZone   @relation(fields: [healthZoneId], references: [id], onDelete: Restrict)
+    centers     HealthCenter[]
+
+    @@index([healthZoneId, name])
+    @@map("health_areas")
+  }
+
+  enum HealthFacilityType {
+    health_center
+    hospital
+    clinic
+    other
+  }
+
+  model UserAssignment {
+  id              BigInt       @id @default(autoincrement())
+  userId          BigInt       @map("user_id")
+  roleCode        String       @map("role_code") @db.VarChar(64)
+  scopeType       String       @map("scope_type") @db.VarChar(24)
+  provinceId      BigInt?      @map("province_id")
+  healthZoneId    BigInt?      @map("health_zone_id")
+  healthCenterId  BigInt?      @map("health_center_id")
+  assignedByUserId BigInt?     @map("assigned_by_user_id")
+  assignedAt      DateTime     @default(now()) @map("assigned_at") @db.Timestamptz(6)
+  expiresAt       DateTime?    @map("expires_at") @db.Timestamptz(6)
+  user            User         @relation("AssignedUser", fields: [userId], references: [id], onDelete: Cascade)
+  role            Role         @relation(fields: [roleCode], references: [code], onDelete: Restrict)
+  province        Province?    @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  healthZone      HealthZone?  @relation(fields: [healthZoneId], references: [id], onDelete: Cascade)
+  healthCenter    HealthCenter? @relation(fields: [healthCenterId], references: [id], onDelete: Cascade)
+  assignedBy      User?        @relation("AssignmentAssigner", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([userId, roleCode, expiresAt])
+  @@index([provinceId, roleCode])
+  @@index([healthZoneId, roleCode])
+  @@index([healthCenterId, roleCode])
+  @@map("user_assignments")
+}
+
+model ProfessionalProfile {
+  userId        BigInt   @id @map("user_id")
+  specialtyCode String   @map("specialty_code") @db.VarChar(64)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("professional_profiles")
+}
+
+model UserCapability {
+  userId          BigInt   @map("user_id")
+  roleCode        String   @map("role_code") @db.VarChar(64)
+  capabilityCode  String   @map("capability_code") @db.VarChar(64)
+  grantedByUserId BigInt?  @map("granted_by_user_id")
+  grantedAt       DateTime @default(now()) @map("granted_at") @db.Timestamptz(6)
+  expiresAt       DateTime? @map("expires_at") @db.Timestamptz(6)
+  userRole        UserRole @relation(fields: [userId, roleCode], references: [userId, roleCode], onDelete: Cascade)
+  grantedBy       User?    @relation("CapabilityGrantor", fields: [grantedByUserId], references: [id], onDelete: SetNull)
+
+  @@id([userId, roleCode, capabilityCode])
+  @@index([capabilityCode, expiresAt])
+  @@index([grantedByUserId, grantedAt])
+  @@map("user_capabilities")
+}
+
+model ConsentRecord {
+  id               BigInt       @id @default(autoincrement())
+  childId          BigInt       @map("child_id")
+  userId           BigInt       @map("user_id")
+  action           String       @db.VarChar(24)
+  capturedAt       DateTime     @map("captured_at") @db.Timestamptz(6)
+  recordedByUserId BigInt?      @map("recorded_by_user_id")
+  method           String?      @db.VarChar(40)
+  evidenceRef      String?      @map("evidence_ref") @db.VarChar(255)
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  guardian         ChildGuardian @relation(fields: [childId, userId], references: [childId, userId], onDelete: Restrict)
+  recordedBy       User?        @relation("ConsentRecorder", fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([childId, userId, capturedAt])
+  @@index([recordedByUserId, capturedAt])
+  @@map("consent_records")
+}
+
+model AccessRequest {
+  id              BigInt     @id @default(autoincrement())
+  requesterUserId BigInt     @map("requester_user_id")
+  childId         BigInt     @map("child_id")
+  permissionCode  String     @map("permission_code") @db.VarChar(128)
+  reason          String     @db.VarChar(1000)
+  status          String     @default("pending") @db.VarChar(16)
+  reviewerUserId  BigInt?    @map("reviewer_user_id")
+  decisionReason  String?    @map("decision_reason") @db.VarChar(1000)
+  requestedAt     DateTime   @default(now()) @map("requested_at") @db.Timestamptz(6)
+  reviewedAt      DateTime?  @map("reviewed_at") @db.Timestamptz(6)
+  requester       User       @relation("AccessRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
+  reviewer        User?      @relation("AccessReviewer", fields: [reviewerUserId], references: [id], onDelete: SetNull)
+  child           Child      @relation(fields: [childId], references: [id], onDelete: Restrict)
+  permission      Permission @relation(fields: [permissionCode], references: [code], onDelete: Restrict)
+
+  @@index([requesterUserId, status, requestedAt])
+  @@index([childId, status, requestedAt])
+  @@index([reviewerUserId, reviewedAt])
+  @@map("access_requests")
+}
+
