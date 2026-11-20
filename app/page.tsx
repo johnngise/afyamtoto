@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -12,15 +13,6 @@ export default function HomePage() {
 
   return (
     <main className="landing-page">
-      <header className="landing-header">
-        <Link className="auth-brand" href="/">AFYAMTOTO <span>AI</span></Link>
-        <nav className="landing-nav"><Link href="/">Accueil</Link><Link href="/mission">Notre mission</Link><Link href="/solutions">Nos solutions</Link><Link href="/fonctionnement">Fonctionnement</Link><Link href="/impact">Impact</Link><Link href="/contact">Contact</Link></nav>
-        <div className="landing-actions">
-          <Link className="button button-outline" href="/login?scope=public">Se connecter</Link>
-          <Link className="button button-primary" href="/register">Créer un compte</Link>
-        </div>
-      </header>
-
       <section className="landing-hero">
         <div className="landing-hero-copy">
           <span className="landing-eyebrow">SANTÉ INFANTILE · 0–5 ANS</span>
@@ -38,6 +30,19 @@ export default function HomePage() {
           <div className="landing-dots">
             {slides.map((_, idx) => (
               <button key={idx} className={idx === i ? "is-active" : ""} onClick={() => setI(idx)} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="carousel-showcase" className="landing-carousel-section" aria-label="Aperçu de la plateforme">
+        <div className="landing-carousel-full">
+          {slides.map((s, idx) => (
+            <div key={s} className={`landing-slide-full ${idx === i ? "is-active" : ""}`} style={{ backgroundImage: `url(${s})` }} />
+          ))}
+          <div className="landing-dots">
+            {slides.map((_, idx) => (
+              <button key={idx} className={idx === i ? "is-active" : ""} onClick={() => setI(idx)} aria-label={`Image ${idx + 1}`} />
             ))}
           </div>
         </div>
@@ -88,16 +93,6 @@ export default function HomePage() {
           <a className="button button-outline" href="#mission">Découvrir notre mission</a>
         </div>
       </section>
-
-      <footer id="contact" className="landing-footer">
-        <div className="landing-footer-grid">
-          <div><strong>AFYAMTOTO AI</strong><p>Plateforme de suivi de la santé des enfants de 0 à 5 ans.</p></div>
-          <div><h4>Navigation</h4><a href="#mission">Mission</a><a href="#solutions">Solutions</a><a href="#how">Fonctionnement</a><a href="#impact">Impact</a></div>
-          <div><h4>Accès</h4><Link href="/login?scope=public">Connexion</Link><Link href="/register">Inscription</Link><Link href="/setup-administrator">Initialisation</Link></div>
-          <div><h4>Légal</h4><a href="#">Confidentialité</a><a href="#">Conditions</a><a href="#">Mentions légales</a></div>
-        </div>
-        <p className="landing-footer-copy">© 2026 AFYAMTOTO AI. Tous droits réservés.</p>
-      </footer>
     </main>
   );
 }
