@@ -1,13 +1,7 @@
-.env
-.env.*
-!.env.example
-/vendor/
-/frontend/node_modules/
-/frontend/.next/
-/frontend/out/
-/frontend/.postgres-data/
-/frontend/.postgres.log
-**/__pycache__/
-**/*.py[cod]
-/storage/*
-!/storage/.gitignore
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+#env files
+.env.local
