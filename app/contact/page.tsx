@@ -1,13 +1,47 @@
-import Link from 'next/link';
+import type { Metadata } from "next";
+import { ContactHero } from "@/app/components/contact/ContactHero";
+import { ContactForm } from "@/app/components/contact/ContactForm";
+import { ContactInfo } from "@/app/components/contact/ContactInfo";
+import { ContactMap } from "@/app/components/contact/ContactMap";
+import { ContactFAQ } from "@/app/components/contact/ContactFAQ";
+import { ContactCTA } from "@/app/components/contact/ContactCTA";
 
-export const metadata = { title: 'contact - AFYAMTOTO AI' };
+export const metadata: Metadata = {
+  title: "Contactez-nous — AFYAMTOTO AI",
+  description:
+    "Contactez l'équipe AFYAMTOTO AI pour vos questions, suggestions ou partenariats. Nous sommes basés à Kinshasa, RDC, et disponibles par email, téléphone et WhatsApp.",
+  openGraph: {
+    title: "Contactez-nous — AFYAMTOTO AI",
+    description:
+      "Contactez l'équipe AFYAMTOTO AI pour vos questions, suggestions ou partenariats.",
+    type: "website",
+    locale: "fr_CD",
+    siteName: "AFYAMTOTO AI",
+  },
+};
 
-export default function Page() {
+export default function ContactPage() {
   return (
-    <>
-      <header className='landing-header'><Link className='auth-brand' href='/'>AFYAMTOTO <span>AI</span></Link></header>
-      <main className='landing-section'><h1>contact</h1><p>Contenu en cours de developpement.</p><p><Link href='/'>Retour a l'accueil</Link></p></main>
-      <footer className='landing-footer'><p>2026 AFYAMTOTO AI. Tous droits reserves.</p></footer>
-    </>
+    <main className="contact-page">
+      <ContactHero />
+
+      <section className="contact-main" aria-labelledby="contact-main-heading">
+        <div className="contact-main__container">
+          <div className="contact-main__grid">
+            <ContactInfo />
+            <div className="contact-form-section">
+              <h2 id="contact-main-heading" className="contact-form-section__heading">
+                Envoyez-nous un message
+              </h2>
+              <ContactForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <ContactMap />
+      <ContactFAQ />
+      <ContactCTA />
+    </main>
   );
 }
