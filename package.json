@@ -10,8 +10,8 @@
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "test:security": "node --experimental-strip-types --test tests/security/rbac-policy.test.mjs",
-    "db:generate": "prisma generate --config prisma7.config.ts",
-    "db:migrate": "prisma migrate deploy --config prisma7.config.ts",
+    "db:generate": "prisma generate --config prisma.config.ts",
+    "db:migrate": "prisma migrate deploy --config prisma.config.ts",
     "db:import:mysql": "node scripts/migrate-mysql-to-postgres.mjs"
   },
   "dependencies": {

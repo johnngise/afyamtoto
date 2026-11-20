@@ -5,7 +5,9 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   let body: unknown;
   try { body = await request.json(); } catch { return jsonError("Corps JSON invalide.", 400); }
+
   if (!body || typeof body !== "object") return jsonError("Données invalides.", 400);
+  
   const data = body as Record<string, unknown>;
   const identifier = typeof data.identifier === "string" ? data.identifier : "";
   const password = typeof data.password === "string" ? data.password : "";

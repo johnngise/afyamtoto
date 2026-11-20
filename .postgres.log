@@ -1,0 +1,58 @@
+2026-11-13 13:22:28.740 SAST [20828] LOG:  starting PostgreSQL 18.7 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-13 13:22:28.742 SAST [20828] LOG:  could not bind IPv4 address "127.0.0.1": Permission denied
+2026-11-13 13:22:28.743 SAST [20828] WARNING:  could not create listen socket for "127.0.0.1"
+2026-11-13 13:22:28.743 SAST [20828] FATAL:  could not create any TCP/IP sockets
+2026-11-13 13:22:28.753 SAST [20828] LOG:  database system is shut down
+2026-11-13 13:23:50.549 SAST [8708] LOG:  starting PostgreSQL 18.7 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-13 13:23:50.563 SAST [8708] LOG:  listening on IPv4 address "127.0.0.1", port 5433
+2026-11-13 13:23:51.169 SAST [21612] LOG:  database system was shut down at 2026-11-13 13:21:46 SAST
+2026-11-13 13:23:51.230 SAST [8708] LOG:  database system is ready to accept connections
+2026-11-13 13:27:40.731 SAST [15328] ERROR:  null value in column "sex" of relation "children" violates not-null constraint
+2026-11-13 13:27:40.731 SAST [15328] DETAIL:  Failing row contains (2, esther, ashuza, 2025-05-05, null, null, null, null, 12, 2026-11-06 15:20:24+02, 2026-11-06 15:20:24+02).
+2026-11-13 13:27:40.731 SAST [15328] STATEMENT:  INSERT INTO "children" ("id", "first_name", "last_name", "date_of_birth", "place_of_birth", "address_text", "photo_path", "created_by_user_id", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) ON CONFLICT DO NOTHING
+2026-11-13 13:28:51.139 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 13:31:24.202 SAST [21812] LOG:  checkpoint complete: wrote 1103 buffers (6.7%), wrote 3 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=151.852 s, sync=1.024 s, total=153.064 s; sync files=593, longest=0.034 s, average=0.002 s; distance=5956 kB, estimate=5956 kB; lsn=0/1E408E8, redo lsn=0/1DD6B78
+2026-11-13 14:13:51.561 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:14:06.580 SAST [21812] LOG:  checkpoint complete: wrote 116 buffers (0.7%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=14.697 s, sync=0.055 s, total=15.029 s; sync files=64, longest=0.004 s, average=0.001 s; distance=492 kB, estimate=5409 kB; lsn=0/1E51F58, redo lsn=0/1E51EC8
+2026-11-13 14:18:51.607 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:18:51.824 SAST [21812] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.113 s, sync=0.002 s, total=0.219 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=4868 kB; lsn=0/1E52178, redo lsn=0/1E52120
+2026-11-13 14:23:51.894 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:23:52.214 SAST [21812] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.219 s, sync=0.005 s, total=0.322 s; sync files=2, longest=0.005 s, average=0.003 s; distance=13 kB, estimate=4383 kB; lsn=0/1E55578, redo lsn=0/1E55520
+2026-11-13 14:24:36.783 SAST [14360] ERROR:  duplicate key value violates unique constraint "users_pkey"
+2026-11-13 14:24:36.783 SAST [14360] DETAIL:  Key (id)=(2) already exists.
+2026-11-13 14:24:36.783 SAST [14360] STATEMENT:  INSERT INTO "public"."users" ("display_name","username","email","phone_e164","password_hash","is_active","created_at","updated_at") VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING "public"."users"."id"
+2026-11-13 14:28:51.228 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:28:53.843 SAST [21812] LOG:  checkpoint complete: wrote 22 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.411 s, sync=0.115 s, total=2.616 s; sync files=20, longest=0.055 s, average=0.006 s; distance=28 kB, estimate=3947 kB; lsn=0/1E5C880, redo lsn=0/1E5C7F0
+2026-11-13 14:33:51.851 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:33:55.002 SAST [21812] LOG:  checkpoint complete: wrote 27 buffers (0.2%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=3.106 s, sync=0.026 s, total=3.152 s; sync files=27, longest=0.003 s, average=0.001 s; distance=41 kB, estimate=3557 kB; lsn=0/1E66FE0, redo lsn=0/1E66F88
+2026-11-13 14:38:51.029 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:38:53.263 SAST [21812] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.132 s, sync=0.052 s, total=2.240 s; sync files=19, longest=0.009 s, average=0.003 s; distance=15 kB, estimate=3203 kB; lsn=0/1E6C5A8, redo lsn=0/1E6AC28
+2026-11-13 14:43:51.281 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:43:53.274 SAST [21812] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.960 s, sync=0.015 s, total=1.995 s; sync files=19, longest=0.003 s, average=0.001 s; distance=20 kB, estimate=2884 kB; lsn=0/1E6FFC8, redo lsn=0/1E6FF38
+2026-11-13 14:48:51.308 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 14:48:51.448 SAST [21812] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.117 s, sync=0.002 s, total=0.142 s; sync files=1, longest=0.002 s, average=0.002 s; distance=2 kB, estimate=2596 kB; lsn=0/1E70A50, redo lsn=0/1E709F8
+2026-11-13 15:08:51.469 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 15:08:51.761 SAST [21812] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.246 s, sync=0.004 s, total=0.298 s; sync files=3, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=2337 kB; lsn=0/1E71148, redo lsn=0/1E710F0
+2026-11-13 15:13:51.770 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 15:13:51.908 SAST [21812] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.113 s, sync=0.002 s, total=0.140 s; sync files=1, longest=0.002 s, average=0.002 s; distance=5 kB, estimate=2103 kB; lsn=0/1E726F0, redo lsn=0/1E72698
+2026-11-13 15:16:03.819 SAST [28520] LOG:  could not receive data from client: unrecognized winsock error 10054
+2026-11-13 15:16:03.819 SAST [26468] LOG:  could not receive data from client: unrecognized winsock error 10054
+2026-11-13 15:16:03.819 SAST [28072] LOG:  could not receive data from client: unrecognized winsock error 10054
+2026-11-13 15:28:51.938 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 15:28:53.618 SAST [21812] LOG:  checkpoint complete: wrote 15 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.648 s, sync=0.012 s, total=1.683 s; sync files=16, longest=0.002 s, average=0.001 s; distance=19 kB, estimate=1895 kB; lsn=0/1E773A0, redo lsn=0/1E77348
+2026-11-13 15:48:54.961 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 15:48:55.107 SAST [21812] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.111 s, sync=0.001 s, total=0.148 s; sync files=1, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=1706 kB; lsn=0/1E77978, redo lsn=0/1E77920
+2026-11-13 15:53:54.116 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 15:53:54.904 SAST [21812] LOG:  checkpoint complete: wrote 7 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.767 s, sync=0.007 s, total=0.789 s; sync files=5, longest=0.004 s, average=0.002 s; distance=41 kB, estimate=1539 kB; lsn=0/1E81F90, redo lsn=0/1E81F38
+2026-11-13 15:58:54.931 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 15:59:08.802 SAST [21812] LOG:  checkpoint complete: wrote 126 buffers (0.8%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=13.769 s, sync=0.086 s, total=13.873 s; sync files=88, longest=0.016 s, average=0.001 s; distance=639 kB, estimate=1449 kB; lsn=0/1F21BE8, redo lsn=0/1F21B58
+2026-11-13 16:03:54.823 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 16:03:55.075 SAST [21812] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.223 s, sync=0.002 s, total=0.256 s; sync files=2, longest=0.002 s, average=0.001 s; distance=8 kB, estimate=1305 kB; lsn=0/1F23E40, redo lsn=0/1F23DE8
+2026-11-13 16:13:54.096 SAST [21812] LOG:  checkpoint starting: time
+2026-11-13 16:14:02.034 SAST [21812] LOG:  checkpoint complete: wrote 71 buffers (0.4%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=7.899 s, sync=0.028 s, total=7.940 s; sync files=47, longest=0.002 s, average=0.001 s; distance=385 kB, estimate=1213 kB; lsn=0/1F84568, redo lsn=0/1F844D8
+2026-11-16 12:28:47.767 SAST [5584] LOG:  starting PostgreSQL 18.7 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-16 12:28:47.774 SAST [5584] LOG:  could not bind IPv6 address "::1": Permission denied
+2026-11-16 12:28:47.774 SAST [5584] LOG:  could not bind IPv4 address "127.0.0.1": Permission denied
+2026-11-16 12:28:47.774 SAST [5584] WARNING:  could not create listen socket for "localhost"
+2026-11-16 12:28:47.774 SAST [5584] FATAL:  could not create any TCP/IP sockets
+2026-11-16 12:28:47.777 SAST [5584] LOG:  database system is shut down
