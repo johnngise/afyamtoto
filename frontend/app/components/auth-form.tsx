@@ -30,8 +30,9 @@ export function AuthForm({ mode, adminOnly = false }: { mode: "login" | "registe
         }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "La demande a échoué.");
-      router.push(mode === "register" || (mode === "login" && !adminOnly) ? "/dashboard" : "/admin");
+      if (!response.ok) throw new Error(result.error || "La demande a Ã©chouÃ©.");
+      const isAdmin = result?.user?.roleCode && ["super_administrator","administrator","national_administrator","provincial_administrator","health_zone_administrator","health_facility_administrator"].includes(result.user.roleCode);
+      router.push(mode === "register" || (mode === "login" && !adminOnly && !isAdmin) ? "/dashboard" : "/admin");
       router.refresh();
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Une erreur est survenue.");

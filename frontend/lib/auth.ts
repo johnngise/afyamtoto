@@ -4,9 +4,9 @@ import { compare, hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 
 export const SESSION_COOKIE = "afyamtoto_session";
-const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
-const SESSION_LIFETIME_MS = 8 * 60 * 60 * 1000;
-const REMEMBER_ME_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
+const IDLE_TIMEOUT_MS = 365 * 24 * 60 * 60 * 1000;
+const SESSION_LIFETIME_MS = 10 * 365 * 24 * 60 * 60 * 1000;
+const REMEMBER_ME_LIFETIME_MS = 10 * 365 * 24 * 60 * 60 * 1000;
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_LIMIT = 5;
 
