@@ -1,0 +1,1 @@
+C:/Program Files/PostgreSQL/18/bin/postgres.exe "-D" ".postgres-data" "-c" "listen_addresses=127.0.0.1" "-p" "5433"
