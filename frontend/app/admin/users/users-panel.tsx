@@ -24,7 +24,7 @@ function selectedIds(form: FormData, key: string) {
 
 function ScopeOptions({ name, options, selected = [] }: { name: string; options: GeographicOption[]; selected?: string[] }) {
   return <fieldset className="admin-scope-picker"><legend>{name === "provinceIds" ? "Provinces" : name === "healthZoneIds" ? "Zones de santé" : "Centres de santé"}</legend>
-    {options.length ? <div className="admin-scope-options">{options.map((option) => <label key={option.id}><input type="checkbox" name={name} value={option.id} defaultChecked={selected.includes(option.id)} /><span>{option.label}</span><small>ID {option.id}</small></label>)}</div> : <p className="admin-scope-empty">Aucune option enregistrée pour le moment.</p>}
+    {options.length ? <div className="admin-scope-options">{options.map((option) => <label key={option.id}><input type={name === "provinceIds" ? "radio" : "checkbox"} name={name} value={option.id} defaultChecked={selected.includes(option.id)} /><span>{option.label}</span><small>ID {option.id}</small></label>)}</div> : <p className="admin-scope-empty">Aucune option enregistrée pour le moment.</p>}
   </fieldset>;
 }
 
